@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- EXTERNAL LIBS-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://www.google.com/jsapi"></script>
+
+    <!-- EXAMPLE SCRIPT -->
+    <script>
+
+      // *** Set this to your location value ***
+      var loc = 'vs';
+
+      // onload callback
+      function drawChart() {
+
+        var public_key = 'WGgL1oKGKdCQG0xlL8xZ';
+
+        // JSONP request
+        var jsonData = $.ajax({
+          url: 'https://data.sparkfun.com/output/' + public_key + '.json',
+          data: {page: 1},
+          dataType: 'jsonp',
+        }).done(function (results) {
+
+          var light_data = new google.visualization.DataTable();
+          light_data.addColumn('datetime', 'Time');
+          light_data.addColumn('number', 'Light');
+
+          var temp_data = new google.visualization.DataTable();
+          temp_data.addColumn('datetime', 'Time');
+          temp_data.addColumn('number', 'Temperature');
+
+          $.each(results, function (i, row) {
+
+            if (row.location == loc) {
+
+                light_data.addRow([
+                  (new Date(row.timestamp)),
+                  parseFloat(row.light)
+                ]);
+
+                temp_data.addRow([
+                  (new Date(row.timestamp)),
+                  parseFloat(row.temp)
+                ]);
+            }
+
+          });
+
+          var light_chart = new google.visualization.LineChart($('#light_chart').get(0));
+
+          light_chart.draw(light_data, {
+            title: 'Vector Space Light Data'
+          });
+
+          var temp_chart = new google.visualization.LineChart($('#temp_chart').get(0));
+
+          temp_chart.draw(temp_data, {
+            title: 'Vector Space Temperature Data'
+          });
+
+
+        });
+
+      }
+
+      // load chart lib
+      google.load('visualization', '1', {
+        packages: ['corechart']
+      });
+
+      // call drawChart once google charts is loaded
+      google.setOnLoadCallback(drawChart);
+
+    </script>
+
+  </head>
+  <body>
+    <div id="light_chart" style="width: 100%;"></div>
+    <div id="temp_chart" style="width: 100%;"></div>
+  </body>
+</html>
